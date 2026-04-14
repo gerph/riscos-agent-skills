@@ -35,7 +35,8 @@ The following skills are provided:
 * `using-bbcbasic`: Helps with the BASIC syntax, common usage and integration with RISC OS.
 * `using-makefiles`: Helps with the build system's makefiles.
 * `using-stronghelp`: Helps with the management of StrongHelp files.
-* `using-cmhg`: Helps with the creation of CMHG files..
+* `using-cmhg`: Helps with the creation of CMHG files.
+* `using-tooltester`: Helps with working with the golden test (expectation test) tool `riscos-tooltester`.
 * `writing-cmodules`: Helps with the development, debugging and testing of modules in C.
 * `writing-pymodules`: Helps with the development, debugging and testing of modules in Pyromaniac PyModules, particularly porting to and from C.
 * `writing-prminxml`: Helps with creating documentation using PRM-in-XML.
