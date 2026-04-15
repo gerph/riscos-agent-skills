@@ -1,7 +1,6 @@
 {
     "name": "riscos-skills",
     "description": "Agent skills for RISC OS",
-    "version": "1.0.0",
     "author": {
         "name": "gerph"
     }

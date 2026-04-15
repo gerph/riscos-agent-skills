@@ -43,3 +43,24 @@ The following skills are provided:
 * `riscos-re`: Helps with RISC OS reverse engineering.
 * `riscos-commands`: Helps with using RISC OS commands.
 * `riscos-output`: Helps with using RISC OS output (VDU, OS_Plot, Draw, Fonts, ColourTrans).
+
+## Claude plugin
+
+This repository also provide a plugin marketplace for Claude. Add the marketplace to Claude and then enable the RISC OS skills plugin.
+
+```
+/plugin marketplace add gerph/riscos-agent-skills
+/plugin install riscos-skills@riscos-agent-skills
+/reload-plugins
+```
+
+### Plugin updates
+
+Auto-update can be enabled by running `/plugin` and navigating to Marketplaces > riscos-skills-plugin and enabling auto-update. Each time Claude starts, any updates to the plugin will be automatically installed.
+
+Or update manually using:
+
+```
+/plugin marketplace update riscos-skills-plugin
+/reload-plugins
+```
