@@ -1,0 +1,16 @@
+{
+    "name": "riscos-skills-plugin",
+    "description": "Agent skills for RISC OS",
+    "owner": {
+        "name": "gerph",
+        "email": "gerph@gerph.org"
+    },
+    "plugins": [
+        {
+            "name": "riscos-skills",
+            "source": "./claude-plugins/riscos-skills",
+            "description": "Agent skills for RISC OS",
+            "version": "1.0.0"
+        }
+    ]
+}

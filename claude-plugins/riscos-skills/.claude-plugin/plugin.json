@@ -1,0 +1,7 @@
+{
+    "name": "riscos-skills",
+    "description": "Agent skills for RISC OS",
+    "author": {
+        "name": "gerph"
+    }
+}
