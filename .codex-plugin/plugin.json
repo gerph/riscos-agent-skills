@@ -1,0 +1,43 @@
+{
+  "name": "riscos-skills",
+  "version": "1.0.0",
+  "description": "Agent skills for RISC OS development, build workflows, reverse engineering, and documentation.",
+  "author": {
+    "name": "Gerph",
+    "email": "gerph@gerph.org",
+    "url": "https://github.com/gerph"
+  },
+  "homepage": "https://github.com/gerph/riscos-agent-skills",
+  "repository": "https://github.com/gerph/riscos-agent-skills",
+  "license": "MIT",
+  "keywords": [
+    "codex",
+    "agent-skills",
+    "riscos",
+    "bbcbasic",
+    "cmhg",
+    "stronghelp"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "RISC OS Skills",
+    "shortDescription": "RISC OS development guidance and workflows",
+    "longDescription": "Adds RISC OS-focused skills for BBC BASIC, CMHG, AMU makefiles, StrongHelp, PRM-in-XML, module development, PyModules, command usage, output systems, and reverse engineering so Codex can follow the conventions and tooling used in RISC OS projects.",
+    "developerName": "Gerph",
+    "category": "Coding",
+    "capabilities": [
+      "Interactive"
+    ],
+    "websiteURL": "https://github.com/gerph/riscos-agent-skills",
+    "privacyPolicyURL": "https://github.com/gerph/riscos-agent-skills",
+    "termsOfServiceURL": "https://github.com/gerph/riscos-agent-skills",
+    "defaultPrompt": [
+      "Use the RISC OS skills for this repository.",
+      "Help me fix this RISC OS module build.",
+      "Explain this BBC BASIC program using the available skills.",
+      "Guide me through a StrongHelp update."
+    ],
+    "brandColor": "#005A9C",
+    "screenshots": []
+  }
+}

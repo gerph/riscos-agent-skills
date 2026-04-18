@@ -44,7 +44,7 @@ The following skills are provided:
 * `riscos-commands`: Helps with using RISC OS commands.
 * `riscos-output`: Helps with using RISC OS output (VDU, OS_Plot, Draw, Fonts, ColourTrans).
 
-## Claude plugin
+## Installation in Claude
 
 This repository also provide a plugin marketplace for Claude. Add the marketplace to Claude and then enable the RISC OS skills plugin.
 
@@ -64,3 +64,44 @@ Or update manually using:
 /plugin marketplace update riscos-skills-plugin
 /reload-plugins
 ```
+
+## Installation in Codex
+
+This repository can also be used as a Codex plugin. The skill content is the
+same; Codex discovers it through the `.codex-plugin/plugin.json` manifest at
+the repository root.
+
+To install it for your user account:
+
+```bash
+mkdir -p ~/plugins ~/.agents/plugins
+ln -sfn /absolute/path/to/riscos-agent-skills ~/plugins/riscos-skills
+```
+
+Create or update `~/.agents/plugins/marketplace.json`:
+
+```json
+{
+  "name": "local",
+  "interface": {
+    "displayName": "Local Plugins"
+  },
+  "plugins": [
+    {
+      "name": "riscos-skills",
+      "source": {
+        "source": "local",
+        "path": "./plugins/riscos-skills"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Coding"
+    }
+  ]
+}
+```
+
+If you already have a marketplace file, append the `riscos-skills` entry instead
+of replacing the whole file. Restart Codex after updating the marketplace.
