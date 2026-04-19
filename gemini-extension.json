@@ -1,0 +1,12 @@
+{
+  "name": "riscos-agent-skills",
+  "version": "1.0.0",
+  "description": "A collection of agent skills for RISC OS development, including help with C modules, BASIC, makefiles, and more.",
+  "author": "gerph",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gerph/riscos-agent-skills.git"
+  },
+  "skills": "skills/"
+}

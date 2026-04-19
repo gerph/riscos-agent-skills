@@ -105,3 +105,25 @@ Create or update `~/.agents/plugins/marketplace.json`:
 
 If you already have a marketplace file, append the `riscos-skills` entry instead
 of replacing the whole file. Restart Codex after updating the marketplace.
+
+## Installation in Gemini CLI
+
+This repository is compatible with Gemini CLI's Agent Skills and Extensions system.
+
+### As an Extension (Recommended)
+
+Installing as an extension allows Gemini to automatically discover and use these skills whenever you are working on a RISC OS project.
+
+```bash
+gemini extensions install https://github.com/gerph/riscos-agent-skills
+```
+
+### As Agent Skills only
+
+If you prefer to only install the individual skills without the full extension package:
+
+```bash
+gemini skills install https://github.com/gerph/riscos-agent-skills
+```
+
+Once installed, Gemini will automatically prompt to activate relevant skills (like `writing-cmodules` or `using-bbcbasic`) when it identifies a RISC OS task.
