@@ -127,3 +127,40 @@ gemini skills install https://github.com/gerph/riscos-agent-skills
 ```
 
 Once installed, Gemini will automatically prompt to activate relevant skills (like `writing-cmodules` or `using-bbcbasic`) when it identifies a RISC OS task.
+
+## Installation in Qwen Code
+
+Qwen Code does not have a remote plugin installation system like Claude, Codex, or Gemini. To use these skills with Qwen Code, you need to manually copy the skill files into your local project's `.qwen/skills/` directory.
+
+### Manual Installation
+
+1. Clone or download this repository to your local machine:
+
+```bash
+git clone https://github.com/gerph/riscos-agent-skills.git
+```
+
+2. Copy the skill directories you want to use into your project's `.qwen/skills/` directory:
+
+```bash
+# Create the skills directory if it doesn't exist
+mkdir -p .qwen/skills/
+
+# Copy specific skills you want to use
+cp -r /path/to/riscos-agent-skills/skills/using-bbcbasic .qwen/skills/
+cp -r /path/to/riscos-agent-skills/skills/writing-cmodules .qwen/skills/
+# Add other skills as needed
+```
+
+Alternatively, you can create symbolic links to the skills:
+
+```bash
+# Create symbolic links to the skills
+ln -s /path/to/riscos-agent-skills/skills/using-bbcbasic .qwen/skills/
+ln -s /path/to/riscos-agent-skills/skills/writing-cmodules .qwen/skills/
+# Add other skills as needed
+```
+
+3. Restart Qwen Code or reload your project for the skills to become available.
+
+Qwen Code will recognize and make use of the skills when you invoke them with the `skill:` command (e.g., `skill: "using-bbcbasic"`).
