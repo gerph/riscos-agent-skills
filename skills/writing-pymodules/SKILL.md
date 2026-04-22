@@ -23,6 +23,24 @@ You cannot pass BASIC statements to the `--command` arguments.
 
 ---
 
+## General Pyromaniac Structure (`riscos/`)
+
+While the `PyModule` system handles modular extensions, the core OS logic is implemented directly in Python:
+
+- **`riscos/quotedstrings.py`**: Provides the `QuotedStrings` class, essential for parsing command lines. It correctly handles space-separated arguments and double-quoted strings.
+- **`riscos/readargs.py`**: Contains the core logic for `OS_ReadArgs`. When implementing this in C, remember that keyword definitions can be complex (e.g., abbreviations via the first character).
+- **`riscos/evaluateexpression.py`**: Handles RISC OS expressions.
+- **`riscos/gstrans.py`**: Handles string translation.
+- **`riscos/sysvars.py`**: Handles system variables.
+- **`riscos/vectors.py`**: Handles vector registration and dispatch.
+- **`riscos/ticker.py`**: Handles timer registration and dispatch.
+- **`riscos/kernel.py`**: Handles core kernel functionality (from booting and memory setup through SWI execution, to callbacks and tracing functions).
+- **`riscos/bufferdata.py`**: Provides interfaces for writing to user buffers, with tracking of overflow and maximum data sizes (used by interfaces like file enumeration).
+- **`riscos/swis/`**: Contains the SWI dispatchers. These often call into the core logic modules (like `readargs.py`).
+
+
+---
+
 ## Python version
 
 Pyromaniac uses **Python 2.7**, which has specific requirements:
@@ -263,7 +281,7 @@ data = self.ro.memory[ptr].read_bytes(length)
 self.ro.memory[ptr].write_bytes(data)
 ```
 
-### Singe byte
+### Single byte
 
 ```
 # Read byte from memory
@@ -373,9 +391,9 @@ class MyModule(PyModule):
 
     def initialise(self, arguments, pwp):
         # Claim a vector using the generated entry point address
-        self.ro.kernel.api.os_claim(vectors.MyV, 
-                                     self.module.entrypoints['my_vector_handler'].address,
-                                     self.pwp.address)
+        self.ro.kernel.api.os_claim(vectors.MyV,
+                                    self.module.entrypoints['my_vector_handler'].address,
+                                    self.pwp.address)
 
     def my_vector_handler(self, regs):
         # Handle the vector call
@@ -421,44 +439,117 @@ When an entry point is used as a vector handler (e.g., via `OS_Claim`):
 - This behavior is handled by `entrypoint_dispatch` in `pymodules.py`, which adjusts the `pc` based on the return value.
 
 
-## Matching C Module Implementation
+---
 
-When creating a PyModule that mirrors a C module:
+## Integration Tests
 
-### 1. Match Error Numbers
+PyModule tests live in `testcode/` and use a gold-master comparison approach. Run them with:
 
-Ensure `error_base` matches the C module's `error-base` in `cmhg/modhead`:
-
-```cmhg
-; C module cmhg/modhead
-error-base: &840000
+```
+bash run-tests <suite-name>
 ```
 
-```python
-# Python module
-error_base = 0x840000
+The log is written to `/tmp/pyro-tests-<suite-name>.log`. Read that file for detailed pass/fail output — do not re-run to inspect results.
+
+### Test suite file format
+
+Each suite is a file `testcode/tests-<name>.txt`. The master list `testcode/tests.txt` includes them via `Include:` lines (add your new suite there, in alphabetical order within its section).
+
+A minimal suite file looks like:
+
+```
+#
+# SUT:    Extension Modules: MyModule
+# Area:   SWIs
+# Class:  Functional
+# Type:   Integration test
+#
+
+
+Group: MyModule: Basic operations
+
+Test: Init and reinit
+Command: $TOOL --load-internal-modules --command "RMReinit MyModule"
+Expect: expect/pymodules/mymodule/reinit
+
+Test: Help text
+Command: $TOOL --load-internal-modules --help-config mymodule.implementation
+Expect: expect/pymodules/mymodule/help_implementation
 ```
 
-### 2. Match Error Messages
+`$TOOL` is substituted with the pyro.py invocation. Standard options used in most suites:
 
-Error messages should be identical:
+- `--load-internal-modules` — load all built-in modules
+- `--load-internal-group core` — load only the core group (faster for basic tests)
+- `--config key=value` — set a configuration value
+- `--set-variable "Name=value"` — set a RISC OS system variable
+- `--set-variable-encoded "Name:charset=value"` — set a variable with charset-encoded content
+- `--command 'RISC OS command'` — execute a command (may be repeated)
+- `--boot-debug <flag>` — enable a debug flag during boot
 
-```cmhg
-error-identifiers: \
-    Err_CreateFailed("Failed to create JUnitXML handle") \
+### Parameterised tests
+
+Groups can share a command template, with each test supplying an `Args:` substitution (`$ARG1`, `$ARG2`, ...):
+
+```
+Group: MyModule: Operations
+
+Command: $TOOL --load-internal-modules bin/mymodule_test $ARG1
+Expect: expect/pymodules/mymodule/$ARG1
+
+Test: Create handle
+Args: create
+
+Test: Close handle
+Args: close
 ```
 
-```python
-errors = [
-    ('CreateFailed', "Failed to create JUnitXML handle"),
-]
+### Replacement scripts
+
+If the output contains timestamps or other variable content, use a `Replace:` file to normalise it before comparison:
+
+```
+Test: Show timestamp
+Command: $TOOL --load-internal-modules --command "MyMod_ShowTime"
+Expect: expect/pymodules/mymodule/showtime
+Replace: expect/pymodules/mymodule/replacements
 ```
 
-### 3. Match SWI Interface
+A replacements file contains Perl-style substitutions, one per line:
 
-SWI names, parameters, and return values should be identical:
-
-```python
-swi_prefix = "JUnitXML"
-swi_names = ['Create', 'TestSuite', 'TestCase', 'Close']
 ```
+s/\d{4}-\d{2}-\d{2}/DATE/g
+s/\d{2}:\d{2}:\d{2}/TIME/g
+```
+
+### Creating expectation files
+
+Run the command manually and capture its output to create the initial expectation file:
+
+```
+python3 pyro.py --load-internal-modules --command "MyCommand" > testcode/expect/pymodules/mymodule/mycommand
+```
+
+Then verify the content looks correct before committing it. Expectation files live in `testcode/expect/<suite-subpath>/`.
+
+### Adding a test to an existing suite
+
+1. Open the relevant `testcode/tests-<name>.txt`.
+2. Add a `Test:` block inside the appropriate `Group:`, or create a new `Group:` if needed.
+3. Create the corresponding expectation file in `testcode/expect/`.
+4. Run `bash run-tests <name>` and confirm the new test passes.
+
+### Registering a new suite
+
+Add an `Include:` line to `testcode/tests.txt` in the appropriate section, in alphabetical order:
+
+```
+Include: tests-pymodules-mymodule.txt
+```
+
+---
+
+## References
+
+* If you need to convert a PyModule to or from C, refer to [references/convert-to-c.md](references/convert-to-c.md), and use the skills `writing-cmodules` and `using-cmhg`.
+* If you need more information on the testing file format, use the still `using-tooltester`.
