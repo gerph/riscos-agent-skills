@@ -10,6 +10,7 @@ license: MIT
 ### Creating a template project
 
 * To create the base files, use `riscos-project create --name <project> --type cmodule --skeleton`
+  This will create the files in the current directory.
 * Then build the project to confirm that it works before making changes.
 
 ### Core Files
@@ -34,9 +35,9 @@ If the service handler or SWI handler is not required, it can be omitted, and th
 
 3. **Makefile** (`Makefile,fe1`) - Build configuration using AMU (RISC OS make)
 
-For more information about the CMHG file format, a blank template can be generated for reference with `riscos-cmunge -blank blank`. Do not commit the template file read in this way - always change the module header.
+For more information about the CMHG file format, a blank template can be generated for reference with `riscos-cmunge -blank blank`. Do not commit the template file read in this way - always change the module header. See the `using-cmhg` skill for more information.
 
-When editing the CMHG file, retain the commented lines to help guide future authors.
+When editing the CMHG file or Makefiles, retain the commented lines to help guide future authors.
 
 ### File Naming Conventions
 
@@ -277,9 +278,10 @@ This generates error blocks with sequential numbers:
 - `Err_CloseSuiteFailed` - error number &840002
 - `Err_BadOp` - error number &12e
 
-If the error is static, it MUST be defined within the CMHG file. Only if the error contains dynamic information should the error block be stored in the module global workspace.
+If the error is static, it MUST be defined within the CMHG file. Only if the error contains dynamic information should the error block be stored in the module global workspace. These symbols will be `#define`'d to hide their internal implementation - the actual symbol in the object file looks like `__err_Err_Name`.
 
-Standard error numbers are defined in the header `riscos/NewErrors.h`.
+Standard error numbers and strings are defined in the header `riscos/NewErrors.h`.
+
 
 ### Using Error Blocks in C Code
 
@@ -307,6 +309,15 @@ _kernel_oserror *SWI_Create(int number, _kernel_swi_regs *r, void *pw)
 2. **Consistency** - Error numbers are automatically assigned
 3. **Maintainability** - Error messages are defined in one place
 4. **Type safety** - Compiler checks error block references
+
+### Implementation Pitfall
+The standard practice is to use the macros defined in the generated header:
+```c
+#include "modhead.h"
+...
+return Err_NotRegistered; // Returns a pointer to an OS error block
+```
+**Problem found**: If you get undefined symbols during linking like `__err_Err_NotRegistered`, it usually means `o.modhead` is missing from the `OBJS` list in your `Makefile`.
 
 
 ## Time Handling
@@ -533,6 +544,26 @@ int ReadLineV_Handler(_kernel_swi_regs *regs, void *pw)
 
 Watch out for recursion. For example, using `OS_Write*` or `printf` within `WrchV` will create a recursive loop.
 
+### Generic veneers
+
+For non-claimable entry points, like driver registrations, the CMHG `generic-veneer` should be used.
+Many modules (CDFSDriver, SCSI, etc.) require passing entry point addresses to the OS or other drivers via a Driver Information Block.
+Other interfaces, like timed events (`OS_CallAfter`, `OS_CallEvery`) have a similar entry point.
+
+**Implementation**: Use the addresses of CMHG-generated generic veneers, not the raw C functions.
+```c
+/* In Mod_Register */
+CDFS_DIB *dib = (CDFS_DIB *)r->r[0];
+dib->msf_to_lba_fn = (int)Entry_MSFToLBA_Veneer; // Address of the veneer
+```
+or
+```c
+_swix(OS_CallAfter, _INR(0,2), 10, Entry_Tick_Veneer, pw); // Veneer address.
+```
+
+This ensures the C environment (relocation, static base) is correctly initialized when the function is called from external assembly or the OS.
+
+
 ## CMHG style guidelines
 
 * Don't remove the comment sections that describe the file. They are useful for humans to know how to add new sections.
@@ -567,6 +598,40 @@ Which makes for nice aligned text.
 
 service-call-handler: Mod_Service Service_ModeChange
 ```
+
+## Module Testing Strategies
+
+### Verifying SWIs in BASIC
+A simple BASIC script is the most effective way to test a new module. Use the skill `using-bbcbasic` if you need to work with BASIC.
+
+**Example: Testing a complex SWI (CD_DriveStatus)**
+```bbcbasic
+REM Passing a pointer in R7
+DIM control_block% 20
+control_block%!0 = device%
+control_block%!4 = card%
+...
+SYS "CD_DriveStatus", 0, 0, 0, 0, 0, 0, 0, control_block% TO status%
+PRINT "Status is: "; status%
+```
+**Key Tip**: Always pass explicit 0s for intermediate registers (R0-R6) to ensure your target register (R7) is correctly populated.
+
+### Verifying Version Blocks
+If your SWI returns a pointer to a block of data:
+```bbcbasic
+SYS "CD_Version" TO v%
+PRINT "Version word: "; v%!0
+PRINT "Version string: "; FNstring0(v%+4)
+
+DEFFNstring0(p%):LOCAL s$:SYS "OS_IntOn",p% TO s$:=s$
+```
+
+## Build and Linker Pitfalls
+
+*   **Missing COMPONENT**: If `COMPONENT` is not defined in the `Makefile`, the build may fail or produce oddly named binaries.
+*   **RAM vs ROM**: Ensure you are building the `ram` target for testing.
+*   **File Suffixes**: Always ensure your `Makefile` handles dependencies on generated headers:
+    `${OZDIR}.module: h.modhead`
 
 
 ## Resources
