@@ -1,0 +1,120 @@
+---
+# Build the skills
+
+name: SkillsArchive
+
+# Controls when the action will run. Triggers the workflow on:
+#   * push on any branch.
+#   * tag creation for tags beginning with a 'v'
+#   * pull requests
+on:
+  push:
+    branches: ["**"]
+    tags: ["v*"]
+  pull_request:
+    types: [opened, reopened, synchronize]
+    branches: ["**"]
+
+jobs:
+  list-skills:
+    runs-on: ubuntu-latest
+    outputs:
+      skills: ${{ steps.list.outputs.skills }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: List skill directories
+        id: list
+        run: |
+          skills=$(find skills -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | sort | jq -R . | jq -sc .)
+          echo "skills=$skills" >> $GITHUB_OUTPUT
+
+  build-skill:
+    needs: list-skills
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        skill: ${{ fromJson(needs.list-skills.outputs.skills) }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Create .skill archive
+        run: |
+          mkdir -p dist
+          echo "Packing ${{ matrix.skill }}.skill"
+          (
+              cd "skills/${{ matrix.skill }}"
+              zip -9r "../../dist/${{ matrix.skill }}.skill" .
+          )
+
+      - uses: actions/upload-artifact@v7
+        with:
+          path: dist/${{ matrix.skill }}.skill
+          archive: false
+          if-no-files-found: error
+
+  build-riscos:
+    needs: list-skills
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      leafname: ${{ steps.version.outputs.leafname }}
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v6
+
+      - name: Give the archive of everything output a versioned name
+        id: version
+        run: |
+          if [ -f gemini-extension.json ] ; then
+              version=$(jq -r .version gemini-extension.json)
+          else
+              version=$(git rev-parse --short HEAD)
+          fi
+          echo "This is version: $version"
+          leafname="RISCOS-Skills-$version.zip"
+          cd skills && zip -9r ../"$leafname" * && cd ..
+          echo "version=$version" >> $GITHUB_OUTPUT
+          echo "leafname=$leafname" >> $GITHUB_OUTPUT
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: RISCOS-Skills
+          path: ${{ steps.version.outputs.leafname }}
+          if-no-files-found: error
+
+  # The release only triggers when the thing that was pushed was a tag starting with 'v'
+  release:
+    needs:
+      - build-skill
+      - build-riscos
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      contents: write
+    steps:
+      - name: Download the built zip
+        uses: actions/download-artifact@v8
+        with:
+          name: RISCOS-Skills
+
+      - name: Download the .skill archives
+        uses: actions/download-artifact@v8
+        with:
+          pattern: "*.skill"
+          path: dist
+          merge-multiple: true
+
+      - name: Create Release
+        id: create_release
+        uses: ncipollo/release-action@v1.20.0
+        with:
+          prerelease: false
+          draft: true
+          artifacts: "${{ needs.build-riscos.outputs.leafname }},dist/*.skill"
