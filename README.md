@@ -43,6 +43,7 @@ The following skills are provided:
 * `writing-cmodules`: Helps with the development, debugging and testing of modules in C.
 * `writing-pymodules`: Helps with the development, debugging and testing of modules in Pyromaniac PyModules, particularly porting to and from C.
 * `writing-prminxml`: Helps with creating documentation using PRM-in-XML.
+* `riscos-filesystem`: Helps with RISC OS-specific filesystem issues and translating to host filenames.
 * `riscos-re`: Helps with RISC OS reverse engineering.
 * `riscos-commands`: Helps with using RISC OS commands.
 * `riscos-output`: Helps with using RISC OS output (VDU, OS_Plot, Draw, Fonts, ColourTrans).
