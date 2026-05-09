@@ -37,6 +37,7 @@ The following skills are provided:
 * `using-stronghelp`: Helps with the management of StrongHelp files.
 * `using-cmhg`: Helps with the creation of CMHG files.
 * `using-tooltester`: Helps with working with the golden test (expectation test) tool `riscos-tooltester`.
+* `using-libasm`: Helps with the use of the Asm library for assembly routines.
 * `using-libgcontext`: Helps with the use of the GContext graphics library.
 * `writing-assembly`: Helps with the development, debugging and testing of assembly code with the RISC OS build environment.
 * `writing-cmodules`: Helps with the development, debugging and testing of modules in C.
