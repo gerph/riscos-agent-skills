@@ -7,11 +7,18 @@ license: MIT
 
 ## Module Structure
 
-### Creating a template project
+### New modules
+
+* If the user requests that a module be built and does not provide a definition of the interfaces, ask if they would like you design the module before launching into implementation.
+* When asked to design a new module, use the `designing-modules` skill to aid in getting the interfaces correct, *before* beginning the implementation.
+
+**Creating a template project**:
 
 * To create the base files, use `riscos-project create --name <project> --type cmodule --skeleton`
   This will create the files in the current directory.
 * Then build the project to confirm that it works before making changes.
+
+
 
 ### Core Files
 
@@ -141,7 +148,7 @@ static void free_handle(junit_handle_t *h)
 * Always look at the `h/modhead` file to find the signature for the SWI handlers.
 * The SWI handler receives registers through a structure:
 
-##E SWI Decoding Table
+### SWI Decoding Table
 
 The `swi-decoding-table` in `cmhg/modhead` maps SWI names to handler functions.
 
@@ -162,6 +169,14 @@ This creates:
 - `JUnitXML_TestSuite` → `SWI_TestSuite()`
 - `JUnitXML_TestCase` → `SWI_TestCase()`
 - `JUnitXML_Close` → `SWI_Close()`
+
+**Centralised handler**
+
+When using a centralized `Mod_SWI` dispatcher, list your SWIs in the `swi-decoding-table` without the `/handler` suffix. This tells CMHG to pass all calls to the main dispatcher rather than looking for individual C functions. The single centralised handler should be avoided unless all SWI calls share common register bindings - in all other cases, multiple handlers should be used.
+
+
+### Handling unknown SWIs
+*  If your `Mod_SWI` handler receives a SWI number it doesn't recognize, it **must** return the special constant `error_BAD_SWI`, which is defined in the generated CMHG header file.
 
 ### Common Mistake - Name Duplication
 
@@ -247,6 +262,15 @@ Otherwise, the module can use global and local variables as they would in any ot
   and other interfaces that require a private word.
 * The private work should never be dereferenced.
 
+### Common errors
+
+A common pitfall in C module implementation is the misuse of the **Private Word** (`pw`).
+
+*   **The Mandate**: In a C module using the Shared C Library, **never** overwrite the private word (e.g., `*((ModuleWorkspace **)pw) = ws;`). The SCL uses the private word to store the relocation address of your module's static data.
+*   **The Consequence**: Overwriting this pointer destroys the SCL's workspace, leading to immediate data aborts (often in `__filbuf` or `_sys_read`) when calling standard C functions like `fopen` or `printf`.
+*   **The Solution**: Use standard C global variables for module state. The SCL handles the relocation of these globals automatically.
+
+
 ## Error Handling
 
 RISC OS error blocks have a fixed structure:
@@ -302,6 +326,25 @@ _kernel_oserror *SWI_Create(int number, _kernel_swi_regs *r, void *pw)
     return NULL;
 }
 ```
+
+### Using error enumerations
+
+When a library returns an error number from an enumeration, these must be converted
+into RISC OS errors. Always convert them to individual error blocks defined in the
+CMHG file. Create a function which converts the status code to a suitable error.
+
+**Wrong**
+```c
+if (status != MOD_OK)
+   return err_FileNotFound;
+```
+
+**Correct**
+```c
+if (status != MOD_OK)
+   return convert_status_to_error(status);
+```
+
 
 ### Benefits of CMHG Error Blocks
 
@@ -401,6 +444,21 @@ IF flags% AND 1 THEN
 ENDIF
 ```
 
+It is redundant to use X-SWIs and raise errors if nothing is being handled.
+
+**Wrong**:
+```basic
+SYS "XModule_Parse", file$ TO h%; flags%
+IF (flags% AND 1) THEN SYS "OS_GenerateError", h%
+```
+
+**Correct**:
+```basic
+SYS "Module_Parse", file$ TO h%
+```
+
+This implicitly raises the error.
+
 ### Build Testing
 
 ```bash
@@ -431,7 +489,7 @@ dprintf("Debug: value=%d\n", value);
 
 Note: `printf` output goes to the debug stream, visible in build logs.
 
-When debug is no longer required, comment out the `#define DEBUG` line. Uncomment if it is needed again.
+When debug is no longer required, comment out the `#define DEBUG` line. Uncomment if it is needed again. NEVER remove the `dprintf(...)` function calls.
 
 ### Build Verification
 
@@ -641,3 +699,5 @@ DEFFNstring0(p%):LOCAL s$:SYS "OS_IntOn",p% TO s$:=s$
 - [PRM 1-26 - SWI Chunk Allocation](https://www.riscos.info/modules/)
 
 - Manager modules may need to announce that they are starting up and shutting down. Usually services are issued for these events. The module announcements pattern can be found here [references/module-announcements.md](references/module-announcements.md).
+
+- Licenses and authorship may be announced with the module acknowledgements service. Adding this service can be achieved by following the [module acknowledgements pattern](references/module-acknowledgements.md).
