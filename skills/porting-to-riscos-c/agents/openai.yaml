@@ -1,0 +1,4 @@
+interface:
+  display_name: "Porting To RISC OS C"
+  short_description: "Port C projects to RISC OS with the RISC OS porting workflow."
+  default_prompt: "Port or validate a C repository for RISC OS using riscos-cport, RISC OS makefiles, and Norcroft build validation."
