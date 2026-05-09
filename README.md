@@ -47,6 +47,7 @@ The following skills are provided:
 * `riscos-re`: Helps with RISC OS reverse engineering.
 * `riscos-commands`: Helps with using RISC OS commands.
 * `riscos-output`: Helps with using RISC OS output (VDU, OS_Plot, Draw, Fonts, ColourTrans).
+* `allocating-resources`: Helps when allocations are required.
 
 ## Installation in Claude
 
