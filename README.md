@@ -48,6 +48,7 @@ The following skills are provided:
 * `riscos-commands`: Helps with using RISC OS commands.
 * `riscos-output`: Helps with using RISC OS output (VDU, OS_Plot, Draw, Fonts, ColourTrans).
 * `allocating-resources`: Helps when allocations are required.
+* `designing-modules`: Helps with the design of modules, before you start implementing.
 
 ## Installation in Claude
 
