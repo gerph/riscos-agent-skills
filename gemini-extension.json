@@ -1,6 +1,6 @@
 {
   "name": "riscos-agent-skills",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "A collection of agent skills for RISC OS development, including help with C modules, BASIC, makefiles, and more.",
   "author": "gerph",
   "license": "MIT",
