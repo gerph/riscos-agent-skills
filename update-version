@@ -1,0 +1,100 @@
+#!/usr/bin/perl
+#
+# update-version - Increment or set version numbers in project configuration files.
+#
+# This script manages the version number across the following files:
+#   - gemini-extension.json
+#   - .claude-plugin/marketplace.json
+#   - .codex-plugin/plugin.json
+#
+# Usage:
+#   ./update-version --patch       Increment the patch version (e.g. 1.0.0 -> 1.0.1)
+#   ./update-version --minor       Increment the minor version, reset patch (e.g. 1.0.1 -> 1.1.0)
+#   ./update-version --major       Increment the major version, reset minor/patch (e.g. 1.1.0 -> 2.0.0)
+#   ./update-version --set X.Y.Z   Explicitly set the version to X.Y.Z
+#   ./update-version --help        Show this help message
+#
+
+use strict;
+use warnings;
+use Getopt::Long;
+
+my $major;
+my $minor;
+my $patch;
+my $set_version;
+my $help;
+
+GetOptions(
+    "major" => \$major,
+    "minor" => \$minor,
+    "patch" => \$patch,
+    "set=s" => \$set_version,
+    "help|h" => \$help,
+) or die("Error in command line arguments\n");
+
+if ($help) {
+    print "Usage: $0 [options]\n";
+    print "Options:\n";
+    print "  --major      Increment major version (X.0.0)\n";
+    print "  --minor      Increment minor version (X.Y.0)\n";
+    print "  --patch      Increment patch version (X.Y.Z)\n";
+    print "  --set X.Y.Z  Set version explicitly\n";
+    print "  --help, -h   Show this help message\n";
+    exit 0;
+}
+
+if (!($major || $minor || $patch || $set_version)) {
+    die "Usage: $0 [--major|--minor|--patch|--set X.Y.Z|--help]\n";
+}
+
+my @files = (
+    "gemini-extension.json",
+    ".claude-plugin/marketplace.json",
+    ".codex-plugin/plugin.json"
+);
+
+foreach my $file (@files) {
+    if (! -f $file) {
+        print "File $file not found, skipping.\n";
+        next;
+    }
+
+    local $/;
+    open(my $fh, '<', $file) or die "Could not open $file: $!";
+    my $content = <$fh>;
+    close($fh);
+
+    if ($content =~ /"version":\s*"(\d+)\.(\d+)\.(\d+)"/) {
+        my ($v_major, $v_minor, $v_patch) = ($1, $2, $3);
+        
+        if ($set_version) {
+            if ($set_version =~ /^(\d+)\.(\d+)\.(\d+)$/) {
+                ($v_major, $v_minor, $v_patch) = ($1, $2, $3);
+            } else {
+                die "Invalid version format for --set: $set_version. Expected X.Y.Z\n";
+            }
+        } elsif ($major) {
+            $v_major++;
+            $v_minor = 0;
+            $v_patch = 0;
+        } elsif ($minor) {
+            $v_minor++;
+            $v_patch = 0;
+        } elsif ($patch) {
+            $v_patch++;
+        }
+
+        my $new_version = "$v_major.$v_minor.$v_patch";
+        if ($content =~ s/("version":\s*")\d+\.\d+\.\d+(")/$1$new_version$2/g) {
+            open($fh, '>', $file) or die "Could not write to $file: $!";
+            print $fh $content;
+            close($fh);
+            print "Updated $file to $new_version\n";
+        } else {
+            print "Failed to replace version in $file\n";
+        }
+    } else {
+        print "Could not find version string in $file\n";
+    }
+}
