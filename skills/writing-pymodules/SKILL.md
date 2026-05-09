@@ -1,6 +1,7 @@
 ---
 name: writing-pymodules
 description: Describes how to build and test PyModules (Python modules for RISC OS Pyromaniac). Use when understanding, updating or creating PyModules to implement a RISC OS module for Pyromaniac.
+license: MIT
 ---
 # Pyromaniac
 
