@@ -392,6 +392,8 @@ For registers that contain bit flags, use `<bitfield-table>` instead of nested l
 
 The `state` attribute can be: `reserved`, `content`, `set`, or `clear`.
 
+If the content for bit elements describes the meaning in terms of the 'set' and 'clear' state consistently, use the `state` attribute to indicate each meaning.
+
 ## System Variable Definitions
 
 System variables require both `name` and `description` attributes:
@@ -548,7 +550,7 @@ The `<meta>` section at the end of the document must include:
 </meta>
 ```
 
-Update the `<history>` section with each major change. The `author` should be your initials or identifier.
+Update the `<history>` section with each major change. The `author` should be your initials or identifier. The earliest change should go first, and be followed by later changes - add new change regisions at the end.
 
 The `<meta>` element must appear **after** all `<chapter>` elements, as a direct child
 of `<riscos-prm>`. Placing it inside a `<chapter>` causes a DTD validity error.
@@ -642,6 +644,9 @@ directly as children of `section`, `subsection`, `subsubsection`, or `category`.
 </category>
 ```
 
+Note that the `offset` element has an implicit `+` prepended to the `number` field,
+so it is not required to include a `+` at the start of its value.
+
 ## `definition-table` and `definition`
 
 The `definition-table` is equally useful for
@@ -712,6 +717,21 @@ Use `value-table` when keys are numbers (e.g. error codes, flag values). Use
 </p>
 ```
 
+## Conversion from other document formats
+
+When creating a PRM-in-XML file from other documents it is expected that the PRM-in-XML format will be the canonical
+format. The source material will usually be abandoned. This means that it is vital that as much information as possible
+is transferred to the PRM-in-XML file. It must not be created as a cheat-sheet.
+
+When converting structure definitions into PRM-in-XML, the `offset-table` is the expected way to do so - if C
+structures are used, they may be included, but the `offset-table` should be the primary reference format. Structures,
+Value lists and BitField tables which are described in the 'Technical Details' section which are referenced in multiple
+locations should be enclosed (with any explanatory details) in a `category` element, if they are not already directly
+described in one of the section elements. They should use the `reference` links when they are mentioned in subsequent
+registers, structures or tables.
+
+Terms used within the document should be explained, and if there are many such terms that are unclear, these
+should be introduced in a 'Terminology' section.
 
 
 ## Quick Reference
@@ -734,6 +754,7 @@ Use `value-table` when keys are numbers (e.g. error codes, flag values). Use
 | `<service-definition>` | Service calls handled | Name without `Service_` prefix |
 | `<swi-definition>` | SWIs implemented | Number without `&` prefix |
 | `<reference>` | Cross-references | Use appropriate `type` |
+| `<fixme>` | Marking a part of the text that needs more work | Put descriptive text about the deficiency within the element |
 
 ### Common commands:
 
