@@ -16,7 +16,17 @@ on:
     branches: ["**"]
 
 jobs:
+  check-skills:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Validate published skills
+        run: python3 check-skills.py
+
   list-skills:
+    needs: check-skills
     runs-on: ubuntu-latest
     outputs:
       skills: ${{ steps.list.outputs.skills }}
@@ -30,7 +40,9 @@ jobs:
           echo "skills=$skills" >> $GITHUB_OUTPUT
 
   build-skill:
-    needs: list-skills
+    needs:
+      - check-skills
+      - list-skills
     runs-on: ubuntu-latest
     timeout-minutes: 5
     strategy:
@@ -56,7 +68,9 @@ jobs:
           if-no-files-found: error
 
   build-riscos:
-    needs: list-skills
+    needs:
+      - check-skills
+      - list-skills
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
     timeout-minutes: 5

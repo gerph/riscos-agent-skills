@@ -1,5 +1,5 @@
 ---
-name: stronghelp-development
+name: using-stronghelp
 description: Development and maintenance of StrongHelp manuals for RISC OS. Use when the agent needs to create, edit, or build StrongHelp manuals, or when processing help pages in the StrongHelp format.
 license: MIT
 ---

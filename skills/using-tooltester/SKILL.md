@@ -1,5 +1,5 @@
 ---
-name: using-tooltesters
+name: using-tooltester
 description: Information about using the riscos-tooltester command, the `tests.txt` file format and replacements that can be used. Use this when the riscos-tooltester command (or its direct perl script `test.pl`) is used to manage testing.
 license: MIT
 ---

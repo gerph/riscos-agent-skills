@@ -79,23 +79,23 @@ The handler reads and writes the register block according to the owning API's AB
 
 ## Service call reference index
 
-Generaal information on CMHG syntax, C handler ABI, claiming, and filtering is in the [Service Calls overview](service-calls-overview.md).
+General information on CMHG syntax, C handler ABI, claiming, and filtering is in the [Service Calls overview](references/service-calls-overview.md).
 
 These files describe common CMHG `service-call-handler` usage patterns:
 
-- [startup, shutdown, reset, and manager started/dying notifications](service-calls-lifecycle-notifications.md)
-- [ResourceFS related registration services](service-calls-resource-registration.md)
-- [Toolbox object/task lifecycle, Wimp start/shutdown, submenu mediation](service-calls-toolbox-and-wimp.md)
-- [filing-system redeclaration, filer lifecycle, disc dismount, and MultiFS format negotiation](service-calls-filing-systems-and-formats.md)
-- [mode changes, display changes/status, screen mode enumeration, and blanking](service-calls-screen-and-display.md)
-- [SCSI, USB, buffers, sound, and other device/provider registrations](service-calls-device-driver-registration.md)
-- [DCI driver/protocol, Internet state, PPP, Freeway, and statistics services](service-calls-networking-status.md)
-- [ImageFileConvert and ImageFileRender registry lifecycle services](service-calls-image-file-registries.md)
-- [services used as synchronous extension interfaces by claiming and returning register values](service-calls-claimable-interfaces.md)
-- [`Service_UKCompression` and `Service_ModulePreInit` patching hooks](service-calls-patching.md)
-- [desktop banners, Wimp shutdown, TaskManager acknowledgements, and shutdown services](service-calls-desktop.md)
-- [`Service_APCSBacktrace` diagnostic extension and minidump hooks](service-calls-diagnostics.md)
-- [`Service_ErrorStarting` and related Wimp error-report monitoring hooks](service-calls-wimp-error-reporting.md)
+- [startup, shutdown, reset, and manager started/dying notifications](references/service-calls-lifecycle-notifications.md)
+- [ResourceFS related registration services](references/service-calls-resource-registration.md)
+- [Toolbox object/task lifecycle, Wimp start/shutdown, submenu mediation](references/service-calls-toolbox-and-wimp.md)
+- [filing-system redeclaration, filer lifecycle, disc dismount, and MultiFS format negotiation](references/service-calls-filing-systems-and-formats.md)
+- [mode changes, display changes/status, screen mode enumeration, and blanking](references/service-calls-screen-and-display.md)
+- [SCSI, USB, buffers, sound, and other device/provider registrations](references/service-calls-device-driver-registration.md)
+- [DCI driver/protocol, Internet state, PPP, Freeway, and statistics services](references/service-calls-networking-status.md)
+- [ImageFileConvert and ImageFileRender registry lifecycle services](references/service-calls-image-file-registries.md)
+- [services used as synchronous extension interfaces by claiming and returning register values](references/service-calls-claimable-interfaces.md)
+- [`Service_UKCompression` and `Service_ModulePreInit` patching hooks](references/service-calls-patching.md)
+- [desktop banners, Wimp shutdown, TaskManager acknowledgements, and shutdown services](references/service-calls-desktop.md)
+- [`Service_APCSBacktrace` diagnostic extension and minidump hooks](references/service-calls-diagnostics.md)
+- [`Service_ErrorStarting` and related Wimp error-report monitoring hooks](references/service-calls-wimp-error-reporting.md)
 
 Service information may often also be found through the `riscos-prm --url Service_...` command.
 
