@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Validate published skills
         run: python3 check-skills.py
@@ -31,7 +31,7 @@ jobs:
     outputs:
       skills: ${{ steps.list.outputs.skills }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: List skill directories
         id: list
@@ -50,7 +50,7 @@ jobs:
       matrix:
         skill: ${{ fromJson(needs.list-skills.outputs.skills) }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Create .skill archive
         run: |
@@ -81,7 +81,7 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Give the archive of everything output a versioned name
         id: version
